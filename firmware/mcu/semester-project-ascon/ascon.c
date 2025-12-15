@@ -34,19 +34,8 @@ static const uint64_t ASCON_RC[] = {
     0xf0, 0xe1, 0xd2, 0xc3, 0xb4, 0xa5, 0x96, 0x87, 0x78, 0x69, 0x5a, 0x4b
 };
 
-#define ASCON_AEAD_VARIANT 1
-#define ASCON_PA_ROUNDS 12
-#define ASCON_128A_PB_ROUNDS 8
-#define ASCON_TAG_SIZE 16
-#define ASCON_128A_RATE 16
 
-#define ASCON_128A_IV                         \
-  (((uint64_t)(ASCON_AEAD_VARIANT) << 0) |    \
-   ((uint64_t)(ASCON_PA_ROUNDS) << 16) |      \
-   ((uint64_t)(ASCON_128A_PB_ROUNDS) << 20) | \
-   ((uint64_t)(ASCON_TAG_SIZE * 8) << 24) |   \
-   ((uint64_t)(ASCON_128A_RATE) << 40))
-
+#define ASCON_128A_IV 0x1000808c0001
 static inline void ascon_round(ascon_state_t* s, uint8_t C) {
     ascon_state_t t;
 
@@ -59,11 +48,11 @@ static inline void ascon_round(ascon_state_t* s, uint8_t C) {
     s->x[2] ^= s->x[1];
     
     // Keccak S-box
-    t.x[0] = s->x[0] ^ (~s->x[1] & s->x[2]);
-    t.x[1] = s->x[1] ^ (~s->x[2] & s->x[3]);
-    t.x[2] = s->x[2] ^ (~s->x[3] & s->x[4]);
-    t.x[3] = s->x[3] ^ (~s->x[4] & s->x[0]);
-    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]);
+    t.x[0] = s->x[0] ^ (~s->x[1] & s->x[2]); // t.x[0] = (IV xor N1) xor (not K0 and K1 xor K0 xor RC)
+    t.x[1] = s->x[1] ^ (~s->x[2] & s->x[3]); // t.x[1] = K0 xor (not (K1 xor K0 xor RC)&N0)
+    t.x[2] = s->x[2] ^ (~s->x[3] & s->x[4]); // t.x[2] = (K1 xor K0 xor RC) xor (not N0 & (N1 xor N0))
+    t.x[3] = s->x[3] ^ (~s->x[4] & s->x[0]); // t.x[3] = N0 xor (not (N1 xor N0) and (IV xor N1))
+    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0)
     
     t.x[1] ^= t.x[0];
     t.x[0] ^= t.x[4];
