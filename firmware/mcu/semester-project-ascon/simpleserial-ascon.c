@@ -17,28 +17,6 @@ uint16_t pt_len = 0;
 uint16_t ad_received = 0;
 uint16_t pt_received = 0;
 
-static inline void zero_registers(void)
-{
-    __asm volatile (
-        "movs r0, #0\n\t"
-        "mov  r1, r0\n\t"
-        "mov  r2, r0\n\t"
-        "mov  r3, r0\n\t"
-        "mov  r4, r0\n\t"
-        "mov  r5, r0\n\t"
-        "mov  r6, r0\n\t"
-        "mov  r7, r0\n\t"
-        "mov  r8, r0\n\t"
-        "mov  r9, r0\n\t"
-        "mov  r10, r0\n\t"
-        "mov  r11, r0\n\t"
-        "mov  r12, r0\n\t"
-        :
-        :
-        : "r0","r1","r2","r3","r4","r5","r6","r7",
-          "r8","r9","r10","r11","r12"
-    );
-}
 
 
 // 'l' - Set Lengths (Expects 16 bytes, uses first 2: [AD_LEN, PT_LEN, ...])
@@ -129,8 +107,6 @@ uint8_t get_pt(uint8_t* p, uint8_t len)
 
 int main(void)
 {
-    zero_registers(); 
-
     platform_init();
     init_uart();
     trigger_setup();

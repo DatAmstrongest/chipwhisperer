@@ -52,7 +52,7 @@ static inline void ascon_round(ascon_state_t* s, uint8_t C) {
     t.x[1] = s->x[1] ^ (~s->x[2] & s->x[3]); // t.x[1] = K0 xor (not (K1 xor K0 xor RC)&N0)
     t.x[2] = s->x[2] ^ (~s->x[3] & s->x[4]); // t.x[2] = (K1 xor K0 xor RC) xor (not N0 & (N1 xor N0))
     t.x[3] = s->x[3] ^ (~s->x[4] & s->x[0]); // t.x[3] = N0 xor (not (N1 xor N0) and (IV xor N1))
-    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0)
+    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0) --> r2 = low, r3 = high
     
     t.x[1] ^= t.x[0];
     t.x[0] ^= t.x[4];
@@ -69,6 +69,22 @@ static inline void ascon_round(ascon_state_t* s, uint8_t C) {
 
 static inline void ascon_p(ascon_state_t* s, int rounds) {
     for (int i = 12 - rounds; i < 12; i++) {
+        __asm volatile(
+        "mov r1, #0 \n\t"
+        "mov r2, #0 \n\t"
+        "mov r3, #0 \n\t"
+        "mov r4, #0 \n\t"
+        "mov r5, #0 \n\t"
+        "mov r6, #0 \n\t"
+        "mov r8, #0 \n\t" // Skip r7 if it's being used for the loop counter 'i'
+        "mov r9, #0 \n\t"
+        "mov r10, #0 \n\t"
+        "mov r11, #0 \n\t"
+        "mov r12, #0 \n\t"
+        : 
+        : 
+        : "memory" // Tell compiler we messed with the machine state
+    );
         ascon_round(s, ASCON_RC[i]);
     }
 }
