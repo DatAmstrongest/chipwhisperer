@@ -572,7 +572,7 @@ static inline void ascon_p(ascon_state_t* s, int rounds) {
   400424:	ea24 040e 	bic.w	r4, r4, lr
   400428:	407c      	eors	r4, r7
   40042a:	9403      	str	r4, [sp, #12]
-    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0)
+    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0) --> r2 = low, r3 = high
   40042c:	9c02      	ldr	r4, [sp, #8]
   40042e:	ea29 0e03 	bic.w	lr, r9, r3
   400432:	ea8e 0e04 	eor.w	lr, lr, r4
@@ -592,7 +592,7 @@ static inline void ascon_p(ascon_state_t* s, int rounds) {
     t.x[1] = s->x[1] ^ (~s->x[2] & s->x[3]); // t.x[1] = K0 xor (not (K1 xor K0 xor RC)&N0)
   400450:	ea24 0c0c 	bic.w	ip, r4, ip
   400454:	69c4      	ldr	r4, [r0, #28]
-    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0)
+    t.x[4] = s->x[4] ^ (~s->x[0] & s->x[1]); // t.x[4] = (N1 xor N0) xor (not (IV xor N1) and K0) --> r2 = low, r3 = high
   400456:	ea88 080b 	eor.w	r8, r8, fp
     t.x[1] ^= t.x[0];
   40045a:	ea8a 0a01 	eor.w	sl, sl, r1
