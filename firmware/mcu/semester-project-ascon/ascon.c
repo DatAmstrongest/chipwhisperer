@@ -8,14 +8,6 @@ static inline uint64_t ROR(uint64_t x, int n) {
     return x >> n | x << (-n & 63);
 }
 
-// Load a 64-bit word from a little-endian byte array
-static inline uint64_t load_word(const uint8_t* bytes, int n) {
-    uint64_t x = 0;
-    for (int i = 0; i < n; ++i) {
-        x |= (uint64_t)bytes[i] << (8 * i);
-    }
-    return x;
-}
 
 // Store a 64-bit word to a little-endian byte array
 static inline void store_word(uint8_t* bytes, uint64_t x, int n) {
@@ -29,14 +21,7 @@ static inline void store_word(uint8_t* bytes, uint64_t x, int n) {
 
 // --- ASCON Core Permutation Implementation ---
 
-// Round constants
-static const uint64_t ASCON_RC[] = {
-    0xf0, 0xe1, 0xd2, 0xc3, 0xb4, 0xa5, 0x96, 0x87, 0x78, 0x69, 0x5a, 0x4b
-};
-
-
-#define ASCON_128A_IV 0x1000808c0001
-static inline void ascon_round(ascon_state_t* s, uint8_t C) {
+void ascon_round(ascon_state_t* s, uint8_t C) {
     ascon_state_t t;
 
     // --- Add Round Constant ---
@@ -69,22 +54,6 @@ static inline void ascon_round(ascon_state_t* s, uint8_t C) {
 
 static inline void ascon_p(ascon_state_t* s, int rounds) {
     for (int i = 12 - rounds; i < 12; i++) {
-        __asm volatile(
-        "mov r1, #0 \n\t"
-        "mov r2, #0 \n\t"
-        "mov r3, #0 \n\t"
-        "mov r4, #0 \n\t"
-        "mov r5, #0 \n\t"
-        "mov r6, #0 \n\t"
-        "mov r8, #0 \n\t" // Skip r7 if it's being used for the loop counter 'i'
-        "mov r9, #0 \n\t"
-        "mov r10, #0 \n\t"
-        "mov r11, #0 \n\t"
-        "mov r12, #0 \n\t"
-        : 
-        : 
-        : "memory" // Tell compiler we messed with the machine state
-    );
         ascon_round(s, ASCON_RC[i]);
     }
 }
