@@ -38,7 +38,7 @@ To ensure ascon running on target (Chipwhisperer Husky) successfully, **target_t
 
 ### Analysis
 
-Jupyter notebook is used for analysis. It is composed of 6 parts: setup of target, r8 register implementation, trace collection, CPA attack to find K0_low, CPA attack to find K0_high, Pearson Correlation graph.
+Jupyter notebook is used for analysis (dpa_ascon.ipynb). It is composed of 6 parts: setup of target, r8 register implementation, trace collection, CPA attack to find K0_low, CPA attack to find K0_high, Pearson Correlation graph.
 1. **Setup of Target**: First part of the Jupyter loads the .hex file created by Makefile to the target, sets initial parameters and restart Chipwhisperer. 
 2. **R8 Register Implementation:**: The r8 register performs **bic** instruction on k0_low and IV_low ^ N1_low. Target is 32 bit chip and it handles 64 bits parts of key (K0, K1) by separating them as low and high to the registers. This register keeps k0_low & (~(iv_low ^ n1_low)). IV is constant, Nonces are known and our goal is the key so this is a perfect attack surface. To exploit it, operation done on r8 register implemented on Python.
 3. **Collecting 500.000 Traces**: To conduct side channel attack, we need huge amount of traces to decrease the effect of the noise on our analysis. 500.000 traces collected for the attack which takes approximately 4 hours. Ascon runs it first round of its 12 permutations in initial phase with the same key and random nonces every time. In each iteration, traces are collected and stored with hypothetical hamming weight calculated which is hamming weight of r8 function, key, nonce and trace.
